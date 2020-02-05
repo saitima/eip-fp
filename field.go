@@ -674,3 +674,14 @@ func (f *field) IsZero(a fieldElement) bool {
 func (f *field) Equal(a, b fieldElement) bool {
 	return f.equal(a, b)
 }
+
+func (f *field) Zero() fieldElement {
+	return f.zero
+}
+func (f *field) One() fieldElement {
+	return f.one
+}
+
+func (f *field) Copy(dst, src fieldElement) {
+	f.copy(dst, src)
+}
