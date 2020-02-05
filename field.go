@@ -326,7 +326,7 @@ func (f *field) Mul(c, a, b fieldElement) {
 }
 
 func (f *field) Exp(c, a fieldElement, e *big.Int) {
-	z := f.newFieldElement()
+	z := f.NewFieldElement()
 	f.copy(z, f.r)
 	for i := e.BitLen(); i >= 0; i-- {
 		f.Mul(z, z, z)
@@ -345,7 +345,7 @@ func (f *field) IsValid(fe []byte) bool {
 	return true
 }
 
-func (f *field) newFieldElement() fieldElement {
+func (f *field) NewFieldElement() fieldElement {
 	return newFieldElement(f.limbSize)
 }
 
@@ -424,7 +424,7 @@ func (f *field) NewFieldElementFromBig(a *big.Int) (fieldElement, error) {
 }
 
 func (f *field) ToBytes(in fieldElement) []byte {
-	t := f.newFieldElement()
+	t := f.NewFieldElement()
 	f.FromMont(t, in)
 	return f.ToBytesNoTransform(t)
 }
@@ -602,11 +602,11 @@ func padBytes(in []byte, size int) []byte {
 }
 
 func (f *field) Inverse(inv, e fieldElement) bool {
-	u, v, s, r := f.newFieldElement(),
-		f.newFieldElement(),
-		f.newFieldElement(),
-		f.newFieldElement()
-	zero := f.newFieldElement()
+	u, v, s, r := f.NewFieldElement(),
+		f.NewFieldElement(),
+		f.NewFieldElement(),
+		f.NewFieldElement()
+	zero := f.NewFieldElement()
 	f.copy(u, f.p)
 	f.copy(v, e)
 	f.copy(s, f._one)

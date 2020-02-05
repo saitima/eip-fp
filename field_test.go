@@ -88,7 +88,7 @@ func BenchmarkField(t *testing.B) {
 	bitSize := limbSize * 64
 	a, _ := field.RandFieldElement(rand.Reader)
 	b, _ := field.RandFieldElement(rand.Reader)
-	c := field.newFieldElement()
+	c := field.NewFieldElement()
 	t.Run(fmt.Sprintf("%d_Add", bitSize), func(t *testing.B) {
 		for i := 0; i < t.N; i++ {
 			field.Add(c, a, b)
@@ -123,7 +123,7 @@ func TestShift(t *testing.T) {
 			field := randField(limbSize)
 			a, _ := field.RandFieldElement(rand.Reader)
 			bi := field.ToBigNoTransform(a)
-			da := field.newFieldElement()
+			da := field.NewFieldElement()
 			field.copy(da, a)
 			field.div_two(da)
 			dbi := new(big.Int).Div(bi, two)
@@ -131,7 +131,7 @@ func TestShift(t *testing.T) {
 			if dbi.Cmp(dbi_2) != 0 {
 				t.Fatalf("bad div 2 operation")
 			}
-			ma := field.newFieldElement()
+			ma := field.NewFieldElement()
 			field.copy(ma, a)
 			field.mul_two(ma)
 			mbi := new(big.Int).Mul(bi, two)
@@ -180,7 +180,7 @@ func TestCopy(t *testing.T) {
 		t.Run(fmt.Sprintf("%d_copy", limbSize*64), func(t *testing.T) {
 			field := randField(limbSize)
 			a, _ := field.RandFieldElement(rand.Reader)
-			b := field.newFieldElement()
+			b := field.NewFieldElement()
 			field.copy(b, a)
 			if !field.Equal(a, b) {
 				t.Fatalf("copy operation fails")
@@ -260,7 +260,7 @@ func TestAdditionCrossAgainstBigInt(t *testing.T) {
 				}
 				a, _ := field.RandFieldElement(rand.Reader)
 				b, _ := field.RandFieldElement(rand.Reader)
-				c := field.newFieldElement()
+				c := field.NewFieldElement()
 				big_a := field.ToBig(a)
 				big_b := field.ToBig(b)
 				big_c := new(big.Int)
@@ -303,8 +303,8 @@ func TestAdditionProperties(t *testing.T) {
 				}
 				a, _ := field.RandFieldElement(rand.Reader)
 				b, _ := field.RandFieldElement(rand.Reader)
-				c_1 := field.newFieldElement()
-				c_2 := field.newFieldElement()
+				c_1 := field.NewFieldElement()
+				c_2 := field.NewFieldElement()
 				field.Add(c_1, a, field.zero)
 				if !field.Equal(c_1, a) {
 					t.Fatalf("a + 0 == a")
@@ -372,7 +372,7 @@ func TestMultiplicationCrossAgainstBigInt(t *testing.T) {
 				}
 				a, _ := field.RandFieldElement(rand.Reader)
 				b, _ := field.RandFieldElement(rand.Reader)
-				c := field.newFieldElement()
+				c := field.NewFieldElement()
 				big_a := field.ToBig(a)
 				big_b := field.ToBig(b)
 				big_c := new(big.Int)
@@ -397,8 +397,8 @@ func TestMultiplicationProperties(t *testing.T) {
 				}
 				a, _ := field.RandFieldElement(rand.Reader)
 				b, _ := field.RandFieldElement(rand.Reader)
-				c_1 := field.newFieldElement()
-				c_2 := field.newFieldElement()
+				c_1 := field.NewFieldElement()
+				c_2 := field.NewFieldElement()
 				field.Mul(c_1, a, field.zero)
 				if !field.Equal(c_1, field.zero) {
 					t.Fatalf("a * 0 == 0")
@@ -434,7 +434,7 @@ func TestExponentiation(t *testing.T) {
 					t.Fatalf("bad field construction")
 				}
 				a, _ := field.RandFieldElement(rand.Reader)
-				u := field.newFieldElement()
+				u := field.NewFieldElement()
 				field.Exp(u, a, big.NewInt(0))
 				if !field.Equal(u, field.one) {
 					t.Fatalf("a^0 == 1")
@@ -443,7 +443,7 @@ func TestExponentiation(t *testing.T) {
 				if !field.Equal(u, a) {
 					t.Fatalf("a^1 == a")
 				}
-				v := field.newFieldElement()
+				v := field.NewFieldElement()
 				field.Mul(u, a, a)
 				field.Mul(u, u, u)
 				field.Mul(u, u, u)
@@ -470,7 +470,7 @@ func TestInversion(t *testing.T) {
 		t.Run(fmt.Sprintf("%d_inversion", limbSize*64), func(t *testing.T) {
 			for i := 0; i < fuz; i++ {
 				field := randField(limbSize)
-				u := field.newFieldElement()
+				u := field.NewFieldElement()
 				field.Inverse(u, field.zero)
 				if !field.Equal(u, field.zero) {
 					t.Fatalf("(0^-1) == 0)")
@@ -485,7 +485,7 @@ func TestInversion(t *testing.T) {
 				if !field.Equal(u, field.r) {
 					t.Fatalf("(r*a) * r*(a^-1) == r)")
 				}
-				v := field.newFieldElement()
+				v := field.NewFieldElement()
 				p := new(big.Int).Set(field.pbig)
 				field.Exp(u, a, p.Sub(p, big.NewInt(2)))
 				field.Inverse(v, a)
