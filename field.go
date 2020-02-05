@@ -40,10 +40,6 @@ type field struct {
 }
 
 func NewField(p []byte) (*field, error) {
-	return newField(p)
-}
-
-func newField(p []byte) (*field, error) {
 	f := new(field)
 	f.pbig = new(big.Int).SetBytes(p)
 	var err error
@@ -297,27 +293,27 @@ func newField(p []byte) (*field, error) {
 	return f, nil
 }
 
-func (f *field) toMont(c, a fieldElement) {
+func (f *field) ToMont(c, a fieldElement) {
 	f._mul(c, a, f.r2, f.p, f.inp)
 }
 
-func (f *field) fromMont(c, a fieldElement) {
+func (f *field) FromMont(c, a fieldElement) {
 	f._mul(c, a, f._one, f.p, f.inp)
 }
 
-func (f *field) add(c, a, b fieldElement) {
+func (f *field) Add(c, a, b fieldElement) {
 	f._add(c, a, b, f.p)
 }
 
-func (f *field) double(c, a fieldElement) {
+func (f *field) Double(c, a fieldElement) {
 	f._double(c, a, f.p)
 }
 
-func (f *field) sub(c, a, b fieldElement) {
+func (f *field) Sub(c, a, b fieldElement) {
 	f._sub(c, a, b, f.p)
 }
 
-func (f *field) neg(c, a fieldElement) {
+func (f *field) Neg(c, a fieldElement) {
 	if f.equal(a, f.zero) {
 		f.copy(a, f.zero)
 		return
@@ -325,23 +321,23 @@ func (f *field) neg(c, a fieldElement) {
 	f._neg(c, a, f.p)
 }
 
-func (f *field) mul(c, a, b fieldElement) {
+func (f *field) Mul(c, a, b fieldElement) {
 	f._mul(c, a, b, f.p, f.inp)
 }
 
-func (f *field) exp(c, a fieldElement, e *big.Int) {
+func (f *field) Exp(c, a fieldElement, e *big.Int) {
 	z := f.newFieldElement()
 	f.copy(z, f.r)
 	for i := e.BitLen(); i >= 0; i-- {
-		f.mul(z, z, z)
+		f.Mul(z, z, z)
 		if e.Bit(i) == 1 {
-			f.mul(z, z, a)
+			f.Mul(z, z, a)
 		}
 	}
 	f.copy(c, z)
 }
 
-func (f *field) isValid(fe []byte) bool {
+func (f *field) IsValid(fe []byte) bool {
 	feBig := new(big.Int).SetBytes(fe)
 	if feBig.Cmp(f.pbig) != -1 {
 		return false
@@ -349,15 +345,11 @@ func (f *field) isValid(fe []byte) bool {
 	return true
 }
 
-func (f *field) NewFieldElement() fieldElement {
-	return f.newFieldElement()
-}
-
 func (f *field) newFieldElement() fieldElement {
 	return newFieldElement(f.limbSize)
 }
 
-func (f *field) randFieldElement(r io.Reader) (fieldElement, error) {
+func (f *field) RandFieldElement(r io.Reader) (fieldElement, error) {
 	bi, err := rand.Int(r, f.pbig)
 	if err != nil {
 		return nil, err
@@ -365,7 +357,7 @@ func (f *field) randFieldElement(r io.Reader) (fieldElement, error) {
 	return newFieldElementFromBigUnchecked(f.limbSize, bi)
 }
 
-func (f *field) newFieldElementFromBytesNoTransform(in []byte) (fieldElement, error) {
+func (f *field) NewFieldElementFromBytesNoTransform(in []byte) (fieldElement, error) {
 	if len(in) != f.byteSize() {
 		return nil, fmt.Errorf("bad input size")
 	}
@@ -377,14 +369,10 @@ func (f *field) newFieldElementFromBytesNoTransform(in []byte) (fieldElement, er
 }
 
 func (f *field) NewFieldElementFromBytes(in []byte) (fieldElement, error) {
-	return f.newFieldElementFromBytes(in)
-}
-
-func (f *field) newFieldElementFromBytes(in []byte) (fieldElement, error) {
 	if len(in) != f.byteSize() {
 		return nil, fmt.Errorf("bad input size")
 	}
-	if !f.isValid(in) {
+	if !f.IsValid(in) {
 		return nil, fmt.Errorf("input is a larger number than modulus")
 	}
 	fe, _, err := newFieldElementFromBytes(in)
@@ -392,11 +380,11 @@ func (f *field) newFieldElementFromBytes(in []byte) (fieldElement, error) {
 		return nil, err
 	}
 	// if limbSize != _limbSize { // panic("") // is not expected // }
-	f.toMont(fe, fe)
+	f.ToMont(fe, fe)
 	return fe, nil
 }
 
-func (f *field) newFieldElementFromString(hexStr string) (fieldElement, error) {
+func (f *field) NewFieldElementFromString(hexStr string) (fieldElement, error) {
 	str := hexStr
 	if len(str) > 1 && str[:2] == "0x" {
 		str = hexStr[:2]
@@ -405,7 +393,7 @@ func (f *field) newFieldElementFromString(hexStr string) (fieldElement, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !f.isValid(in) {
+	if !f.IsValid(in) {
 		return nil, fmt.Errorf("input is a larger number than modulus")
 	}
 	if len(in) > f.byteSize() {
@@ -415,13 +403,13 @@ func (f *field) newFieldElementFromString(hexStr string) (fieldElement, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.toMont(fe, fe)
+	f.ToMont(fe, fe)
 	return fe, nil
 }
 
-func (f *field) newFieldElementFromBig(a *big.Int) (fieldElement, error) {
+func (f *field) NewFieldElementFromBig(a *big.Int) (fieldElement, error) {
 	in := a.Bytes()
-	if !f.isValid(in) {
+	if !f.IsValid(in) {
 		return nil, fmt.Errorf("input is a larger number than modulus")
 	}
 	if len(in) > f.byteSize() {
@@ -431,21 +419,17 @@ func (f *field) newFieldElementFromBig(a *big.Int) (fieldElement, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.toMont(fe, fe)
+	f.ToMont(fe, fe)
 	return fe, nil
 }
 
 func (f *field) ToBytes(in fieldElement) []byte {
-	return f.toBytes(in)
-}
-
-func (f *field) toBytes(in fieldElement) []byte {
 	t := f.newFieldElement()
-	f.fromMont(t, in)
-	return f.toBytesNoTransform(t)
+	f.FromMont(t, in)
+	return f.ToBytesNoTransform(t)
 }
 
-func (f *field) toBytesNoTransform(in fieldElement) []byte {
+func (f *field) ToBytesNoTransform(in fieldElement) []byte {
 	switch f.limbSize {
 	case 1:
 		return toBytes((*[1]uint64)(in)[:])
@@ -484,20 +468,20 @@ func (f *field) toBytesNoTransform(in fieldElement) []byte {
 	}
 }
 
-func (f *field) toBig(in fieldElement) *big.Int {
-	return new(big.Int).SetBytes(f.toBytes(in))
+func (f *field) ToBig(in fieldElement) *big.Int {
+	return new(big.Int).SetBytes(f.ToBytes(in))
 }
 
-func (f *field) toBigNoTransform(in fieldElement) *big.Int {
-	return new(big.Int).SetBytes(f.toBytesNoTransform(in))
+func (f *field) ToBigNoTransform(in fieldElement) *big.Int {
+	return new(big.Int).SetBytes(f.ToBytesNoTransform(in))
 }
 
-func (f *field) toString(in fieldElement) string {
-	return hex.EncodeToString(f.toBytes(in))
+func (f *field) ToString(in fieldElement) string {
+	return hex.EncodeToString(f.ToBytes(in))
 }
 
-func (f *field) toStringNoTransform(in fieldElement) string {
-	return hex.EncodeToString(f.toBytesNoTransform(in))
+func (f *field) ToStringNoTransform(in fieldElement) string {
+	return hex.EncodeToString(f.ToBytesNoTransform(in))
 }
 
 func (f *field) byteSize() int {
@@ -618,10 +602,6 @@ func padBytes(in []byte, size int) []byte {
 }
 
 func (f *field) Inverse(inv, e fieldElement) bool {
-	return f.inverse(inv, e)
-}
-
-func (f *field) inverse(inv, e fieldElement) bool {
 	u, v, s, r := f.newFieldElement(),
 		f.newFieldElement(),
 		f.newFieldElement(),
@@ -677,16 +657,20 @@ func (f *field) inverse(inv, e fieldElement) bool {
 	}
 	// Phase 2
 	for i := k; i < bitSize*2; i++ {
-		f.double(u, u)
+		f.Double(u, u)
 	}
 	f.copy(inv, u)
 	return true
 }
 
-func (f *field) square(result, a fieldElement) {
-	f.mul(result, a, a)
+func (f *field) Square(result, a fieldElement) {
+	f.Mul(result, a, a)
 }
 
-func (f *field) isZero(a fieldElement) bool {
+func (f *field) IsZero(a fieldElement) bool {
 	return f.equal(a, f.zero)
+}
+
+func (f *field) Equal(a, b fieldElement) bool {
+	return f.equal(a, b)
 }
